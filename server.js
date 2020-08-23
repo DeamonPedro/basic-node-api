@@ -2,6 +2,7 @@ require("dotenv").config();
 const koaBody = require("koa-body");
 const jwt = require("koa-jwt");
 const Koa = require("koa");
+const { AUTHENTICATION_ERROR } = require("./errors");
 
 const auth = require("./auth");
 

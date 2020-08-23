@@ -1,18 +1,24 @@
 const Router = require("koa-router");
 const jsonwebtoken = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const { user } = require("./db");
 const {
   INVALID_DATA,
   USER_NOT_FOUND,
   USER_ALREADY_REGISTERED,
+  WRONG_PASSWORD,
 } = require("./errors");
 const router = new Router({ prefix: "/account" });
 
 const getAccountData = async ({ email, pass }) => {
   if (email != null && pass != null) {
-    const account = await user.find({ email, pass });
-    if (account != 0) {
-      return account[0];
+    const account = (await user.find({ email }))[0];
+    if (account) {
+      if (await bcrypt.compare(pass, account.pass)) {
+        return account;
+      } else {
+        throw new Error(WRONG_PASSWORD);
+      }
     } else {
       throw new Error(USER_NOT_FOUND);
     }
@@ -25,7 +31,11 @@ const registerAccount = async ({ name, email, pass }) => {
   if (name != null && email != null && pass != null) {
     const account = await user.find({ email });
     if (account == 0) {
-      await new user({ user, email, pass }).save();
+      await new user({
+        name,
+        email,
+        pass: await bcrypt.hash(pass, parseInt(process.env.HASH_LEVEL)),
+      }).save();
     } else {
       throw new Error(USER_ALREADY_REGISTERED);
     }
