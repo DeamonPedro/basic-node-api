@@ -7,6 +7,7 @@ const {
   USER_NOT_FOUND,
   USER_ALREADY_REGISTERED,
   WRONG_PASSWORD,
+  getStatusCodeByError,
 } = require("./errors");
 const router = new Router({ prefix: "/account" });
 
@@ -67,13 +68,7 @@ router.post("/signIn", async (ctx, next) => {
       ),
     };
   } catch (err) {
-    if (err.message == USER_NOT_FOUND) {
-      ctx.status = 401;
-    } else if (err.message == INVALID_DATA) {
-      ctx.status = 400;
-    } else {
-      ctx.status = 500;
-    }
+    ctx.status = getStatusCodeByError(err.message);
     ctx.body = {
       error: err.message,
     };
@@ -88,13 +83,7 @@ router.post("/signUp", async (ctx, next) => {
       status: "registered",
     };
   } catch (err) {
-    if (err.message == USER_NOT_FOUND) {
-      ctx.status = 400;
-    } else if (err.message == USER_ALREADY_REGISTERED) {
-      ctx.status = 409;
-    } else {
-      ctx.status = 500;
-    }
+    ctx.status = getStatusCodeByError(err.message);
     ctx.body = {
       error: err.message,
     };
@@ -113,11 +102,7 @@ router.delete("/delete", async (ctx, next) => {
       status: "deleted",
     };
   } catch (err) {
-    if (err.message == USER_NOT_FOUND) {
-      ctx.status = 401;
-    } else if (err.message == INVALID_DATA) {
-      ctx.status = 400;
-    }
+    ctx.status = getStatusCodeByError(err.message);
     ctx.body = {
       error: err.message,
     };

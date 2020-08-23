@@ -9,6 +9,14 @@ const auth = require("./auth");
 const app = new Koa();
 
 app.use(koaBody());
+app.use((ctx, next) => {
+  return next().catch((err) => {
+    ctx.status = 401;
+    ctx.body = {
+      error: AUTHENTICATION_ERROR,
+    };
+  });
+});
 app.use(
   jwt({
     secret: process.env.JWT_SECRET,
